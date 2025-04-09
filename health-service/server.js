@@ -58,8 +58,30 @@ async function startServer() {
 
   // Apply middlewares
   app.use(cookieParser());
-  app.use(cors());
-  app.use(express.json());
+  app.use(
+    cors({
+      origin: [
+        "https://auth-app.onrender.com",
+        "https://nurse-app.onrender.com",
+        "https://patient-app.onrender.com",
+        "https://shell-app.onrender.com",
+      ],
+      credentials: true,
+    })
+  );
+
+  app.use(
+    express.json({
+      verify: (req, res, buf) => {
+        try {
+          JSON.parse(buf);
+        } catch (e) {
+          throw new Error("Invalid JSON");
+        }
+      },
+    })
+  );
+
   app.use(authMiddleware);
 
   // Health check endpoint
