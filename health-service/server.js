@@ -66,6 +66,9 @@ async function startServer() {
         "https://nurse-app.onrender.com",
         "https://patient-app.onrender.com",
         "https://shell-app.onrender.com",
+        "https://authenticationapp-mylj.onrender.com", // ✅ Auth MFE
+        "https://patient-mfe.onrender.com", // ✅ Patient MFE
+        "https://nurse-app-izij.onrender.com", // ✅ Nurse MFE
       ],
       credentials: true,
     })
