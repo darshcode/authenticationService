@@ -60,14 +60,7 @@ async function startServer() {
   app.use(cookieParser());
   app.use(
     cors({
-      origin: [
-        "https://auth-app.onrender.com",
-        "https://nurse-app.onrender.com",
-        "https://nurse-app-izij.onrender.com",
-        "https://patient-app.onrender.com",
-        "https://shell-app.onrender.com",
-        "https://authenticationapp-mylj.onrender.com",
-      ],
+      origin: "*",
       credentials: true,
     })
   );
