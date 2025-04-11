@@ -109,6 +109,8 @@ async function startServer() {
         // (Optional) Prevent caching while debugging CORS
         res.setHeader("Cache-Control", "no-cache");
       },
+      etag: false, // 🔥 disables 304 responses
+      lastModified: false,
     })
   );
 
