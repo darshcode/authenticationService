@@ -91,7 +91,7 @@ async function startServer() {
   app.use(
     "/assets",
     express.static(staticAssetsPath, {
-      setHeaders: (res, path) => {
+      setHeaders: (res) => {
         res.setHeader(
           "Access-Control-Allow-Origin",
           "https://shell-app.onrender.com"
