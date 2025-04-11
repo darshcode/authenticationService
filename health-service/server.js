@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const path = require("path");
 const typeDefs = require("./typedefs");
 const resolvers = require("./resolvers");
 const dotenv = require("dotenv");
@@ -21,17 +22,14 @@ mongoose
 
 // Authentication middleware
 const authMiddleware = async (req, res, next) => {
-  // Extract token from Authorization header
-  // Handle both "Bearer token" and just "token" formats
   const authHeader = req.headers.authorization;
   let token = null;
 
   if (authHeader) {
-    // Check if it's in "Bearer token" format
     if (authHeader.startsWith("Bearer ")) {
-      token = authHeader.substring(7); // Remove "Bearer " prefix
+      token = authHeader.substring(7);
     } else {
-      token = authHeader; // Use the token as is
+      token = authHeader;
     }
   }
 
@@ -53,23 +51,20 @@ const authMiddleware = async (req, res, next) => {
 };
 
 async function startServer() {
-  // Create Express app
   const app = express();
 
-  // Apply middlewares
-  app.use(cookieParser());
-  app.use(
-    cors({
-      origin: [
-        "https://authenticationapp-mylj.onrender.com",
-        "https://nurse-app.onrender.com",
-        "https://patient-mfe.onrender.com/",
-        "https://shell-app.onrender.com",
-      ],
-      credentials: true,
-    })
-  );
+  // Set up CORS
+  const allowedOrigins = [
+    "https://authenticationapp-mylj.onrender.com",
+    "https://nurse-app.onrender.com",
+    "https://patient-mfe.onrender.com",
+    "https://shell-app.onrender.com",
+  ];
 
+  app.use(cookieParser());
+  app.use(cors({ origin: allowedOrigins, credentials: true }));
+
+  // JSON error handler
   app.use(
     express.json({
       verify: (req, res, buf) => {
@@ -84,55 +79,55 @@ async function startServer() {
 
   app.use(authMiddleware);
 
-  // Health check endpoint
+  // Health check
   app.get("/health", (req, res) => {
     res.status(200).send("Health Service is running");
   });
 
+  // Serve static assets (remoteEntry.js, etc.) from Vite dist folder
+  const distPath = path.join(__dirname, "dist");
+  app.use("/assets", express.static(path.join(distPath, "assets")));
+
+  // Add CORS headers specifically for remoteEntry.js
+  app.get("/assets/remoteEntry.js", (req, res, next) => {
+    res.setHeader(
+      "Access-Control-Allow-Origin",
+      "https://shell-app.onrender.com"
+    );
+    res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.sendFile(path.join(distPath, "assets/remoteEntry.js"));
+  });
+
   try {
-    // Create Apollo Server with Federation subgraph schema
     const server = new ApolloServer({
       schema: buildSubgraphSchema({ typeDefs, resolvers }),
       introspection: true,
     });
 
-    // Start Apollo Server
     await server.start();
     console.log("Apollo Server started");
 
-    // Apply middleware for GraphQL
     app.use(
       "/graphql",
       expressMiddleware(server, {
-        context: async ({ req }) => {
-          // Log request headers for debugging
-          console.log(
-            "GraphQL request headers:",
-            JSON.stringify(req.headers, null, 2)
-          );
-
-          return {
-            req,
-            headers: req.headers,
-            user: req.user,
-            isAuthenticated: req.isAuthenticated,
-            token: req.headers.authorization,
-          };
-        },
+        context: async ({ req }) => ({
+          req,
+          headers: req.headers,
+          user: req.user,
+          isAuthenticated: req.isAuthenticated,
+          token: req.headers.authorization,
+        }),
       })
     );
 
-    // Start the server
     const PORT = process.env.PORT || 4000;
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(
-        `🚀 Health Service ready at http://localhost:${PORT}/graphql`
-      );
+      console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
   }
 }
 
-// Start the server
 startServer();
