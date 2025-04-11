@@ -56,7 +56,7 @@ async function startServer() {
   // Set up CORS
   const allowedOrigins = [
     "https://authenticationapp-mylj.onrender.com",
-    "https://nurse-app.onrender.com",
+    "https://nurse-app-izij.onrender.com",
     "https://patient-mfe.onrender.com",
     "https://shell-app.onrender.com",
   ];
@@ -84,25 +84,23 @@ async function startServer() {
     res.status(200).send("Health Service is running");
   });
 
-  // Serve static assets (remoteEntry.js, etc.) from Vite dist folder
   const distPath = path.join(__dirname, "dist");
 
-  // ✅ Serve all static files with proper CORS headers
   const staticAssetsPath = path.join(distPath, "assets");
 
-  // Set CORS headers on all static file responses
-  app.use("/assets", (req, res, next) => {
-    res.setHeader(
-      "Access-Control-Allow-Origin",
-      "https://shell-app.onrender.com"
-    );
-    res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    next();
-  });
-
-  // Then serve static files
-  app.use("/assets", express.static(staticAssetsPath));
+  app.use(
+    "/assets",
+    express.static(staticAssetsPath, {
+      setHeaders: (res, path) => {
+        res.setHeader(
+          "Access-Control-Allow-Origin",
+          "https://shell-app.onrender.com"
+        );
+        res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+      },
+    })
+  );
 
   try {
     const server = new ApolloServer({
