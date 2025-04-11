@@ -93,11 +93,21 @@ async function startServer() {
     express.static(staticAssetsPath, {
       setHeaders: (res, path, stat) => {
         const origin = res.req.headers.origin;
-        if (allowedOrigins.includes(origin)) {
+
+        // Reflect allowed origin for CORS
+        if (origin && allowedOrigins.includes(origin)) {
           res.setHeader("Access-Control-Allow-Origin", origin);
         }
+
+        // Always set required headers
         res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
         res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+        // 🧠 Tells Render/Cloudflare to cache responses *per origin*
+        res.setHeader("Vary", "Origin");
+
+        // (Optional) Prevent caching while debugging CORS
+        res.setHeader("Cache-Control", "no-cache");
       },
     })
   );
