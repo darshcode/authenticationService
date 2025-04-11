@@ -96,6 +96,10 @@ async function startServer() {
     );
     res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader(
+      "Access-Control-Allow-Origin",
+      "https://shell-app.onrender.com"
+    );
     res.sendFile(path.join(distPath, "assets/remoteEntry.js"));
   });
 
