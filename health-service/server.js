@@ -61,9 +61,9 @@ async function startServer() {
   app.use(
     cors({
       origin: [
-        "https://auth-app.onrender.com",
+        "https://authenticationapp-mylj.onrender.com",
         "https://nurse-app.onrender.com",
-        "https://patient-app.onrender.com",
+        "https://patient-mfe.onrender.com/",
         "https://shell-app.onrender.com",
       ],
       credentials: true,
