@@ -86,22 +86,23 @@ async function startServer() {
 
   // Serve static assets (remoteEntry.js, etc.) from Vite dist folder
   const distPath = path.join(__dirname, "dist");
-  app.use("/assets", express.static(path.join(distPath, "assets")));
 
-  // Add CORS headers specifically for remoteEntry.js
-  app.get("/assets/remoteEntry.js", (req, res, next) => {
+  // ✅ Serve all static files with proper CORS headers
+  const staticAssetsPath = path.join(distPath, "assets");
+
+  // Set CORS headers on all static file responses
+  app.use("/assets", (req, res, next) => {
     res.setHeader(
       "Access-Control-Allow-Origin",
       "https://shell-app.onrender.com"
     );
     res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    res.setHeader(
-      "Access-Control-Allow-Origin",
-      "https://shell-app.onrender.com"
-    );
-    res.sendFile(path.join(distPath, "assets/remoteEntry.js"));
+    next();
   });
+
+  // Then serve static files
+  app.use("/assets", express.static(staticAssetsPath));
 
   try {
     const server = new ApolloServer({
