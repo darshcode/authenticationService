@@ -91,11 +91,11 @@ async function startServer() {
   app.use(
     "/assets",
     express.static(staticAssetsPath, {
-      setHeaders: (res) => {
-        res.setHeader(
-          "Access-Control-Allow-Origin",
-          "https://shell-app.onrender.com"
-        );
+      setHeaders: (res, path, stat) => {
+        const origin = res.req.headers.origin;
+        if (allowedOrigins.includes(origin)) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+        }
         res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
         res.setHeader("Access-Control-Allow-Headers", "Content-Type");
       },
